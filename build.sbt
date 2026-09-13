@@ -1,0 +1,37 @@
+val scala3Version = "3.3.7"
+
+//Automatically reload the build when source changes are detected by setting `Global / onChangedBuildSource := ReloadOnSourceChanges`.
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+lazy val root = project
+  .in(file("."))
+  .settings(
+    name := "syllabol",
+    organization := "indigonet",
+    version := "0.1.0-SNAPSHOT",
+
+    scalaVersion := scala3Version,
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      Dependencies.logbackClassic,
+      Dependencies.pekkoActorTyped,
+      Dependencies.pekkoSlf4j,
+    ),
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      Dependencies.munit,
+      Dependencies.scalatest,
+    ),
+
+//    excludeDependencies ++= Seq(
+//      "org.slf4j" % "slf4j-api",
+//      "commons-logging" % "commons-logging",
+//    ),
+  ).
+  settings(
+    excludeDependencies ++= Seq(
+//      "org.slf4j" % "slf4j-api",
+    ),
+  )
