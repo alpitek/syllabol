@@ -17,6 +17,7 @@ lazy val root = project
       Dependencies.logbackClassic,
       Dependencies.pekkoActorTyped,
       Dependencies.pekkoSlf4j,
+      Dependencies.generex,
     ),
   )
   .settings(

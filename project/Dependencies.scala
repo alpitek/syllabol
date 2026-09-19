@@ -8,11 +8,15 @@ object Dependencies {
 
   lazy val pekkoVersion = "1.7.0"
 
+  lazy val generexVersion = "1.0.2"
+
 
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackClassicVersion
 
   lazy val pekkoActorTyped = "org.apache.pekko" %% "pekko-actor-typed" % pekkoVersion
   lazy val pekkoSlf4j = "org.apache.pekko" %% "pekko-slf4j" % pekkoVersion
+
+  lazy val generex = "com.github.mifmif" % "generex" % generexVersion
 
   lazy val scalatest = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   lazy val munit = "org.scalameta" %% "munit" % mUnitVersion % Test
