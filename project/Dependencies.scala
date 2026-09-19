@@ -18,6 +18,7 @@ object Dependencies {
 
   lazy val generex = "com.github.mifmif" % "generex" % generexVersion
 
+  lazy val pekkoActorTestkitTyped =  "org.apache.pekko" %% "pekko-actor-testkit-typed" % pekkoVersion % Test
   lazy val scalatest = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   lazy val munit = "org.scalameta" %% "munit" % mUnitVersion % Test
 }

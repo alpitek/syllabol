@@ -24,6 +24,7 @@ lazy val root = project
     libraryDependencies ++= Seq(
       Dependencies.munit,
       Dependencies.scalatest,
+      Dependencies.pekkoActorTestkitTyped,
     ),
 
 //    excludeDependencies ++= Seq(
