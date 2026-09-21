@@ -6,11 +6,10 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "syllabol",
+    name         := "syllabol",
     organization := "indigonet",
-    version := "0.1.0-SNAPSHOT",
-
-    scalaVersion := scala3Version,
+    version      := "0.1.0-SNAPSHOT",
+    scalaVersion := scala3Version
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -24,24 +23,24 @@ lazy val root = project
       Dependencies.postgresql,
       Dependencies.hikariCP,
       Dependencies.flywayCore,
-      Dependencies.flywayPostgresql,
-    ),
+      Dependencies.flywayPostgresql
+    )
   )
   .settings(
     libraryDependencies ++= Seq(
       Dependencies.munit,
       Dependencies.scalatest,
       Dependencies.pekkoActorTestkitTyped,
-      Dependencies.pekkoPersistenceTestkit,
-    ),
+      Dependencies.pekkoPersistenceTestkit
+    )
 
 //    excludeDependencies ++= Seq(
 //      "org.slf4j" % "slf4j-api",
 //      "commons-logging" % "commons-logging",
 //    ),
-  ).
-  settings(
+  )
+  .settings(
     excludeDependencies ++= Seq(
 //      "org.slf4j" % "slf4j-api",
-    ),
+    )
   )
