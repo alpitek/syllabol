@@ -18,6 +18,13 @@ lazy val root = project
       Dependencies.pekkoActorTyped,
       Dependencies.pekkoSlf4j,
       Dependencies.generex,
+      Dependencies.pekkoPersistenceTyped,
+      Dependencies.pekkoPersistenceJdbc,
+      Dependencies.pekkoSerializationJackson,
+      Dependencies.postgresql,
+      Dependencies.hikariCP,
+      Dependencies.flywayCore,
+      Dependencies.flywayPostgresql,
     ),
   )
   .settings(
@@ -25,6 +32,7 @@ lazy val root = project
       Dependencies.munit,
       Dependencies.scalatest,
       Dependencies.pekkoActorTestkitTyped,
+      Dependencies.pekkoPersistenceTestkit,
     ),
 
 //    excludeDependencies ++= Seq(
