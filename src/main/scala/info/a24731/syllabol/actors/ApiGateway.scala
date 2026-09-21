@@ -10,24 +10,24 @@ import org.apache.pekko.actor.typed.scaladsl.Behaviors
 object ApiGateway:
   sealed trait ApiCommand
   final case class StartGeneration(
-    languageId: String,
-    grammar: Grammar,
-    amount: Int,
-    replyTo: ActorRef[StartJobResponse]
+      languageId: String,
+      grammar: Grammar,
+      amount: Int,
+      replyTo: ActorRef[StartJobResponse]
   ) extends ApiCommand
   final case class GetJobStatus(
-    jobId: JobId,
-    replyTo: ActorRef[GetJobStatusResponse]
+      jobId: JobId,
+      replyTo: ActorRef[GetJobStatusResponse]
   ) extends ApiCommand
   final case class MasterTerminated(jobId: JobId) extends ApiCommand
 
   object ApiResponses:
     sealed trait ApiResponse
-    sealed trait StartJobResponse extends ApiResponse
-    case class GenerationStarted(jobId: JobId) extends StartJobResponse
-    sealed trait GetJobStatusResponse extends ApiResponse
+    sealed trait StartJobResponse                                                 extends ApiResponse
+    case class GenerationStarted(jobId: JobId)                                    extends StartJobResponse
+    sealed trait GetJobStatusResponse                                             extends ApiResponse
     case class JobStatus(jobId: JobId, state: String, completed: Int, total: Int) extends GetJobStatusResponse
-    case class JobNotFound(jobId: JobId) extends GetJobStatusResponse
+    case class JobNotFound(jobId: JobId)                                          extends GetJobStatusResponse
 
   def apply(generator: WordGenerator): Behavior[ApiCommand] = Behaviors.setup { context =>
     context.log.info("ApiGateway started")
@@ -35,7 +35,7 @@ object ApiGateway:
     def running(activeMasters: Map[JobId, ActorRef[GenerationMaster.Command]]): Behavior[ApiCommand] =
       Behaviors.receiveMessage {
         case StartGeneration(langId, grammar, amount, replyTo) =>
-          
+
           val jobId = JobId.generate()
           context.log.info(s"Creating new generation job $jobId for language $langId")
 
@@ -54,7 +54,7 @@ object ApiGateway:
           activeMasters.get(jobId) match {
             case Some(masterRef) =>
               masterRef ! GetStatus(replyTo)
-            case None => 
+            case None =>
               replyTo ! JobNotFound(jobId)
           }
 
@@ -67,4 +67,3 @@ object ApiGateway:
 
     running(Map.empty)
   }
-

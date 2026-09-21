@@ -13,10 +13,10 @@ object GeneratorWorker:
 
   sealed trait Command
   final case class GenerateBatch(
-    jobId: JobId,
-    expression: String,
-    count: Int,
-    replyTo: ActorRef[Response]
+      jobId: JobId,
+      expression: String,
+      count: Int,
+      replyTo: ActorRef[Response]
   ) extends Command
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -28,16 +28,15 @@ object GeneratorWorker:
   )
   sealed trait Response                                              extends PersistenceSerialization
   final case class BatchGenerated(jobId: JobId, words: List[String]) extends Response
-  final case class BatchFailed(jobId: JobId, reason: String) extends Response
+  final case class BatchFailed(jobId: JobId, reason: String)         extends Response
 
   def apply(generator: WordGenerator): Behavior[Command] =
-    Behaviors.receiveMessage {
-      case GenerateBatch(jobId, expression, count, replyTo) =>
-        generator.generate(expression, count) match
-          case Success(words) =>
-            replyTo ! BatchGenerated(jobId, words)
-          case Failure(exception) =>
-            replyTo ! BatchFailed(jobId, exception.getMessage)
+    Behaviors.receiveMessage { case GenerateBatch(jobId, expression, count, replyTo) =>
+      generator.generate(expression, count) match
+        case Success(words) =>
+          replyTo ! BatchGenerated(jobId, words)
+        case Failure(exception) =>
+          replyTo ! BatchFailed(jobId, exception.getMessage)
 
-        Behaviors.same
+      Behaviors.same
     }

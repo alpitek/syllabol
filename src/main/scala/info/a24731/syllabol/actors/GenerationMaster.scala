@@ -11,8 +11,8 @@ object GenerationMaster:
   final case class GetStatus(replyTo: ActorRef[GetJobStatusResponse]) extends Command
 
   // internal commands for state switching (FSM)
-  private final case class BatchCompleted(generatedCount: Int) extends Command
-  private final case class JobFailed(reason: String) extends Command
+  private final case class BatchCompleted(generatedCount: Int)                extends Command
+  private final case class JobFailed(reason: String)                          extends Command
   private final case class WorkerResponse(response: GeneratorWorker.Response) extends Command
 
   def apply(jobId: JobId, languageId: String, grammar: Grammar, amount: Int, generator: WordGenerator): Behavior[Command] =
@@ -23,7 +23,8 @@ object GenerationMaster:
         context.messageAdapter(resp => WorkerResponse(resp))
 
       val pool = Routers.pool(poolSize = 4) {
-        Behaviors.supervise(GeneratorWorker(generator))
+        Behaviors
+          .supervise(GeneratorWorker(generator))
           .onFailure[Exception](SupervisorStrategy.restart)
       }
       val router = context.spawn(pool, s"worker-pool-$jobId")
@@ -34,41 +35,42 @@ object GenerationMaster:
       generating(jobId, amount, completedAmount = 0, batchSize, router, workerReplyTo, grammar)
     }
 
-  private def generating(jobId: JobId,
-    totalAmount: Int,
-    completedAmount: Int,
-    batchSize: Int,
-    router: ActorRef[GeneratorWorker.Command],
-    workerReplyTo: ActorRef[GeneratorWorker.Response],
-    grammar: Grammar,
+  private def generating(
+      jobId: JobId,
+      totalAmount: Int,
+      completedAmount: Int,
+      batchSize: Int,
+      router: ActorRef[GeneratorWorker.Command],
+      workerReplyTo: ActorRef[GeneratorWorker.Response],
+      grammar: Grammar
   ): Behavior[Command] =
-    Behaviors.receive { (context, message) => message match
-      case GetStatus(replyTo) =>
-        replyTo ! JobStatus(jobId, state = "Running", completed = completedAmount, total = totalAmount)
-        Behaviors.same
+    Behaviors.receive { (context, message) =>
+      message match
+        case GetStatus(replyTo) =>
+          replyTo ! JobStatus(jobId, state = "Running", completed = completedAmount, total = totalAmount)
+          Behaviors.same
 
-      case WorkerResponse(GeneratorWorker.BatchGenerated(_, words)) =>
-        context.log.info(s"Generated ${words.size} words: ${words.take(100).mkString(", ")}${if (words.size > 100) "..." else ""}")
-        val count = words.size
-        val newTotal = completedAmount + count
+        case WorkerResponse(GeneratorWorker.BatchGenerated(_, words)) =>
+          context.log.info(s"Generated ${words.size} words: ${words.take(100).mkString(", ")}${if (words.size > 100) "..." else ""}")
+          val count    = words.size
+          val newTotal = completedAmount + count
 
-        if (newTotal >= totalAmount) then
-          completed(jobId, totalAmount)
-        else
-          val nextBatchSize = math.min(batchSize, totalAmount - newTotal)
-          router ! GeneratorWorker.GenerateBatch(jobId, grammar.wordPattern, nextBatchSize, workerReplyTo)
-          generating(jobId, totalAmount, newTotal, batchSize, router, workerReplyTo, grammar)
+          if (newTotal >= totalAmount) then completed(jobId, totalAmount)
+          else
+            val nextBatchSize = math.min(batchSize, totalAmount - newTotal)
+            router ! GeneratorWorker.GenerateBatch(jobId, grammar.wordPattern, nextBatchSize, workerReplyTo)
+            generating(jobId, totalAmount, newTotal, batchSize, router, workerReplyTo, grammar)
 
-      case WorkerResponse(GeneratorWorker.BatchFailed(_, reason)) =>
-        failed(jobId, totalAmount, completedAmount, reason)
+        case WorkerResponse(GeneratorWorker.BatchFailed(_, reason)) =>
+          failed(jobId, totalAmount, completedAmount, reason)
 
-      case BatchCompleted(count) =>
-        val newTotal = completedAmount + count
-        if (newTotal >= totalAmount) then completed(jobId, totalAmount)
-        else generating(jobId, totalAmount, newTotal, batchSize, router, workerReplyTo, grammar)
+        case BatchCompleted(count) =>
+          val newTotal = completedAmount + count
+          if (newTotal >= totalAmount) then completed(jobId, totalAmount)
+          else generating(jobId, totalAmount, newTotal, batchSize, router, workerReplyTo, grammar)
 
-      case JobFailed(reason) =>
-        failed(jobId, totalAmount, completedAmount, reason)
+        case JobFailed(reason) =>
+          failed(jobId, totalAmount, completedAmount, reason)
     }
 
   private def completed(jobId: JobId, totalAmount: Int): Behavior[Command] =
@@ -92,4 +94,4 @@ object GenerationMaster:
     }
 
   def simulateBatchCompletion(count: Int): Command = BatchCompleted(count)
-  def simulateFailure(reason: String): Command = JobFailed(reason)
+  def simulateFailure(reason: String): Command     = JobFailed(reason)

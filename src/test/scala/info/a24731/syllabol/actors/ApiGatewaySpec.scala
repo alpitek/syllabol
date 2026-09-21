@@ -10,14 +10,13 @@ import scala.util.Success
 
 class ApiGatewaySpec extends ScalaTestWithActorTestKit with AnyWordSpecLike:
 
-  private val stubGenerator: WordGenerator = (expr: String, count: Int) =>
-      Success(List.fill(count)("stubWord"))
+  private val stubGenerator: WordGenerator = (expr: String, count: Int) => Success(List.fill(count)("stubWord"))
 
   "ApiGateway" should {
 
     "start a generation job and return GenerationStarted" in {
       val gateway = spawn(ApiGateway(stubGenerator))
-      val probe = createTestProbe[StartJobResponse]()
+      val probe   = createTestProbe[StartJobResponse]()
       val grammar = Grammar("syllable", "word")
 
       gateway ! ApiGateway.StartGeneration("dwarven", grammar, amount = 50, probe.ref)
@@ -27,10 +26,10 @@ class ApiGatewaySpec extends ScalaTestWithActorTestKit with AnyWordSpecLike:
     }
 
     "route GetJobStatus request to the corresponding active master" in {
-      val gateway = spawn(ApiGateway(stubGenerator))
-      val startProbe = createTestProbe[StartJobResponse]()
+      val gateway     = spawn(ApiGateway(stubGenerator))
+      val startProbe  = createTestProbe[StartJobResponse]()
       val statusProbe = createTestProbe[GetJobStatusResponse]()
-      val grammar = Grammar("syllable", "word")
+      val grammar     = Grammar("syllable", "word")
 
       gateway ! ApiGateway.StartGeneration("elvish", grammar, amount = 100, startProbe.ref)
       val started = startProbe.expectMessageType[GenerationStarted]
@@ -43,8 +42,8 @@ class ApiGatewaySpec extends ScalaTestWithActorTestKit with AnyWordSpecLike:
     }
 
     "return JobNotFound for non-existing jobId" in {
-      val gateway = spawn(ApiGateway(stubGenerator))
-      val probe = createTestProbe[GetJobStatusResponse]()
+      val gateway      = spawn(ApiGateway(stubGenerator))
+      val probe        = createTestProbe[GetJobStatusResponse]()
       val unknownJobId = JobId.generate()
 
       gateway ! ApiGateway.GetJobStatus(unknownJobId, probe.ref)

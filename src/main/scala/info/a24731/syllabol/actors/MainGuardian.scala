@@ -12,21 +12,21 @@ import scala.language.postfixOps
 
 object MainGuardian:
   sealed trait Command
-  private final case class WrappedStartResponse(resp: StartJobResponse) extends Command
+  private final case class WrappedStartResponse(resp: StartJobResponse)      extends Command
   private final case class WrappedStatusResponse(resp: GetJobStatusResponse) extends Command
-  private case object CheckStatus extends Command
+  private case object CheckStatus                                            extends Command
 
-  private val period = 500
+  private val period       = 500
   private val grammarWidth = 35000000
 
   def apply(): Behavior[Command] = Behaviors.setup { context =>
-      Behaviors.withTimers { timers =>
+    Behaviors.withTimers { timers =>
       context.log.info("Initializing Syllabol system...")
 
       val generator = new GenerexWordGenerator()
-      val gateway = context.spawn(ApiGateway(generator), "api-gateway")
+      val gateway   = context.spawn(ApiGateway(generator), "api-gateway")
 
-      val startAdapter = context.messageAdapter[StartJobResponse](WrappedStartResponse.apply)
+      val startAdapter  = context.messageAdapter[StartJobResponse](WrappedStartResponse.apply)
       val statusAdapter = context.messageAdapter[GetJobStatusResponse](WrappedStatusResponse.apply)
 
       val testGrammar = Grammar(
@@ -61,8 +61,7 @@ object MainGuardian:
           if (state == "Completed" || state.startsWith("Failed")) then
             context.log.info("Generation finished. Stopping ActorSystem...")
             Behaviors.stopped
-          else
-            Behaviors.same
+          else Behaviors.same
 
         case WrappedStatusResponse(JobNotFound(_)) =>
           context.log.warn("Job not found!")

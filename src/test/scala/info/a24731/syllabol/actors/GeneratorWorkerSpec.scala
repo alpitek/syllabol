@@ -17,8 +17,8 @@ class GeneratorWorkerSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike
           Success(List.fill(count)("test"))
 
       val worker = spawn(GeneratorWorker(successGenerator))
-      val probe = createTestProbe[Response]()
-      val jobId = JobId.generate()
+      val probe  = createTestProbe[Response]()
+      val jobId  = JobId.generate()
 
       worker ! GenerateBatch(jobId, "[a-z]+", 3, probe.ref)
       probe.expectMessage(BatchGenerated(jobId, List("test", "test", "test")))
@@ -30,8 +30,8 @@ class GeneratorWorkerSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike
           Failure(new IllegalArgumentException("Unclosed character class"))
 
       val worker = spawn(GeneratorWorker(failingGenerator))
-      val probe = createTestProbe[Response]()
-      val jobId = JobId.generate()
+      val probe  = createTestProbe[Response]()
+      val jobId  = JobId.generate()
 
       worker ! GenerateBatch(jobId, "[a-z+", 3, probe.ref)
       probe.expectMessage(BatchFailed(jobId, "Unclosed character class"))
