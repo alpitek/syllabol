@@ -1,0 +1,45 @@
+
+name: Scala CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  SBT_OPTS: "-Xmx4G -XX:+UseG1GC -XX:+ClassUnloading"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: jdk setup based on .sdkmanrc
+        uses: actions/setup-java@v4
+        with:
+          java-version-file: '.sdkmanrc'
+          distribution: 'temurin' #
+          cache: 'sbt'
+
+      - name: set up sbt
+        uses: sbt/setup-sbt@v1
+
+#      - name: Check Formatting
+#        run: sbt scalafmtCheckAll scalafmtSbtCheck
+
+      - name: code format check then compile and test
+        run: sbt --batch scalafmtCheckAll scalafmtSbtCheck compile test
+
+      - name: format check, test & coverage
+        run: sbt --batch scalafmtCheckAll scalafmtSbtCheck coverage test coverageReport
+
+      - name: coverage report upload
+        uses: actions/upload-artifact@v4
+        if: always() # report even on tests failed
+        with:
+          name: coverage-report
+          path: target/scala-*/scoverage-report/
